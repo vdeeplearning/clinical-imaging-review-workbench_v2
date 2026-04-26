@@ -10,10 +10,7 @@ Built as a portfolio project to demonstrate modern Python desktop application de
 
 ## Screenshot
 
-> Add your screenshot file here:
-> `docs/screenshots/patient-directory-and-history.png`
-
-![Clinical Imaging Review Workbench](docs/screenshots/patient-directory-and-history.png)
+![Clinical Imaging Review Workbench](docs/screenshots/clinical-imaging-review-workbench_screenshot.png)
 
 ---
 
