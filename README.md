@@ -8,6 +8,15 @@ Built as a portfolio project to demonstrate modern Python desktop application de
 
 ---
 
+## Screenshot
+
+> Add your screenshot file here:
+> `docs/screenshots/patient-directory-and-history.png`
+
+![Clinical Imaging Review Workbench](docs/screenshots/patient-directory-and-history.png)
+
+---
+
 ## Why I Built This
 
 I wanted to build a practical, domain-inspired desktop application that feels closer to real-world clinical software than a toy CRUD app.
@@ -79,29 +88,13 @@ This project demonstrates:
 - **SQLite** (local persistence)
 - **JSON** (demo data seeding)
 - **WSL + VS Code** (development workflow)
-- Designed to be packaged later as a **Windows `.exe`** with PyInstaller
 
 ---
 
-## Architecture Overview
+## Installation
 
-The application uses a simple desktop architecture:
+### 1. Clone the repository
 
-```text id="xv48p7"
-UI (PySide6)
-  ├── Patient Directory / Controls
-  ├── Scan History
-  └── Scan Workspace (new entry or read-only detail)
-
-Services Layer
-  ├── create / load patient
-  ├── save scan
-  ├── load scan history
-  ├── load scan detail
-  ├── delete scan
-  └── delete patient
-
-Data Layer (SQLite)
-  ├── patients
-  ├── scans
-  └── lesions
+```bash
+git clone <your-repo-url>
+cd clinical-imaging-review-workbench
