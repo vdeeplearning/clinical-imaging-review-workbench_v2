@@ -80,3 +80,86 @@ clinical-imaging-review-workbench/
 ├── main.py
 ├── requirements.txt
 └── README.md
+
+Getting Started
+1) Clone or download the repository
+
+If you are using Git:
+
+git clone https://github.com/vdeeplearning/clinical-imaging-review-workbench.git
+cd clinical-imaging-review-workbench
+
+Or download the ZIP from GitHub and extract it, then open a terminal in the project folder.
+
+2) Create a virtual environment
+Windows (PowerShell)
+python -m venv .venv
+macOS / Linux / WSL
+python3 -m venv .venv
+3) Activate the virtual environment
+Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+
+If PowerShell blocks activation, run:
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\Activate.ps1
+macOS / Linux / WSL
+source .venv/bin/activate
+4) Install dependencies
+pip install -r requirements.txt
+5) Run the application
+python main.py
+First Launch / Demo Data
+
+On first launch:
+
+the app creates a local SQLite database file
+if the database is empty, it automatically seeds demo data from:
+sample_data/demo_data.json
+
+This means the app should open with a populated Patient Directory, making it immediately usable for demo purposes.
+
+Resetting Demo Data
+
+To reset the app to a fresh demo state:
+
+Close the app
+Delete the local database file:
+clinical_imaging_review.db
+Run the app again:
+python main.py
+
+The app will recreate the database and re-seed from the demo JSON.
+
+Validation Notes
+
+Current validation includes:
+
+lesion label required
+long-axis endpoints cannot be identical
+short-axis endpoints cannot be identical
+warning for duplicate lesion labels
+warning if short diameter exceeds long diameter
+Architecture Overview
+UI (PySide6)
+  ├── Patient Directory / Controls
+  ├── Scan History
+  └── Scan Workspace (new entry or read-only detail)
+
+Services Layer
+  ├── create / load patient
+  ├── save scan
+  ├── load scan history
+  ├── load scan detail
+  ├── delete scan
+  └── delete patient
+
+Data Layer (SQLite)
+  ├── patients
+  ├── scans
+  └── lesions
+Data Model
+Patient
+  └── many Scans
+        └── many Lesions
