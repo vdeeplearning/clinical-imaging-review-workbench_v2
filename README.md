@@ -14,6 +14,14 @@ This is a portfolio project. It is designed to demonstrate a healthcare-adjacent
 
 ---
 
+## Screenshot
+
+![Clinical Imaging Review Workbench V2 screenshot](docs/screenshots/Screenshot_v2.png)
+
+The screenshot above shows the main workflow: patient selection, scan history, x-ray image viewing with a rectangular annotation box, and read-only historical review details.
+
+---
+
 ## What The App Does
 
 The app lets a user maintain a small local imaging review database.
@@ -415,3 +423,5 @@ Future directions could include:
 - DICOM support
 - measurement tools
 - export/report generation
+
+
