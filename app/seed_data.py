@@ -1,156 +1,152 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 from app.database import get_connection
-from app.utils import euclidean_distance_3d
+from app.models import Lesion
+from app.services import get_or_create_patient, save_scan
 
 
-def seed_demo_data_if_empty() -> None:
+def get_demo_data_path() -> Path | None:
     """
-    Seed demo JSON data into the SQLite database only if there are no patients yet.
-    Safe to call at every startup.
+    Find demo_data.json in a robust way across:
+    - source execution
+    - PyInstaller one-dir
+    - PyInstaller one-file
     """
+    candidate_paths: list[Path] = []
+
+    # PyInstaller runtime temp dir (especially important for one-file)
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        candidate_paths.append(Path(sys._MEIPASS) / "sample_data" / "demo_data.json")
+
+    # Folder containing the executable (useful fallback for one-dir)
+    if getattr(sys, "frozen", False):
+        candidate_paths.append(Path(sys.executable).resolve().parent / "sample_data" / "demo_data.json")
+        candidate_paths.append(Path(sys.executable).resolve().parent / "_internal" / "sample_data" / "demo_data.json")
+
+    # Normal source mode: project root / sample_data / demo_data.json
+    candidate_paths.append(Path(__file__).resolve().parent.parent / "sample_data" / "demo_data.json")
+
+    for path in candidate_paths:
+        if path.exists():
+            return path
+
+    return None
+
+
+def database_is_empty() -> bool:
     with get_connection() as conn:
-        row = conn.execute("SELECT COUNT(*) AS count FROM patients").fetchone()
-        patient_count = row["count"]
+        cur = conn.cursor()
+        cur.execute("SELECT COUNT(*) AS count FROM patients")
+        row = cur.fetchone()
+        count = row["count"] if row is not None else 0
+        return count == 0
 
-    if patient_count > 0:
+
+def _lesion_from_json(lesion_json: dict) -> Lesion:
+    long_axis = lesion_json["long"]
+    short_axis = lesion_json["short"]
+
+    return Lesion(
+        id=None,
+        scan_fk=None,
+        lesion_label=lesion_json["lesion_label"],
+
+        long_x1=float(long_axis["x1"]),
+        long_y1=float(long_axis["y1"]),
+        long_z1=float(long_axis["z1"]),
+        long_x2=float(long_axis["x2"]),
+        long_y2=float(long_axis["y2"]),
+        long_z2=float(long_axis["z2"]),
+
+        short_x1=float(short_axis["x1"]),
+        short_y1=float(short_axis["y1"]),
+        short_z1=float(short_axis["z1"]),
+        short_x2=float(short_axis["x2"]),
+        short_y2=float(short_axis["y2"]),
+        short_z2=float(short_axis["z2"]),
+
+        long_diameter=0.0,
+        short_diameter=0.0,
+
+        notes=lesion_json.get("notes", ""),
+    )
+
+
+def seed_demo_data_if_needed() -> None:
+    """
+    Seed the database from sample_data/demo_data.json only if the DB is empty.
+    Safe to call on every app startup.
+    """
+    if not database_is_empty():
         return
 
-    base_dir = Path(__file__).resolve().parent.parent
-    json_path = base_dir / "sample_data" / "demo_data.json"
+    demo_path = get_demo_data_path()
 
-    if not json_path.exists():
-        print("Demo JSON file not found. Skipping demo data seeding.")
+    if demo_path is None:
+        print("[seed_data] Demo data file not found in any expected location.")
         return
 
-    with json_path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
+    try:
+        with demo_path.open("r", encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception as exc:
+        print(f"[seed_data] Failed to read demo data: {exc}")
+        return
 
-    patients = data.get("patients", [])
+    patients = payload.get("patients", [])
     if not isinstance(patients, list):
-        print("Invalid demo JSON format: 'patients' must be a list.")
+        print("[seed_data] Invalid demo data format: 'patients' must be a list.")
         return
 
-    with get_connection() as conn:
-        for patient_obj in patients:
-            patient_id = str(patient_obj.get("patient_id", "")).strip()
-            if not patient_id:
+    for patient_json in patients:
+        patient_id = str(patient_json.get("patient_id", "")).strip()
+        if not patient_id:
+            continue
+
+        patient = get_or_create_patient(patient_id)
+
+        scans = patient_json.get("scans", [])
+        if not isinstance(scans, list):
+            continue
+
+        for scan_json in scans:
+            scan_date = str(scan_json.get("scan_date", "")).strip()
+            if not scan_date:
                 continue
 
-            # Insert patient
-            patient_cursor = conn.execute(
-                """
-                INSERT INTO patients (patient_id)
-                VALUES (?)
-                """,
-                (patient_id,),
-            )
-            patient_fk = patient_cursor.lastrowid
+            accession_number = str(scan_json.get("accession_number", "")).strip()
 
-            scans = patient_obj.get("scans", [])
-            if not isinstance(scans, list):
+            lesions_json = scan_json.get("lesions", [])
+            if not isinstance(lesions_json, list) or not lesions_json:
                 continue
 
-            for scan_obj in scans:
-                scan_date = str(scan_obj.get("scan_date", "")).strip()
-                accession_number = str(scan_obj.get("accession_number", "")).strip()
+            lesions: list[Lesion] = []
+            for lesion_json in lesions_json:
+                try:
+                    lesion = _lesion_from_json(lesion_json)
+                    lesions.append(lesion)
+                except Exception as exc:
+                    print(
+                        f"[seed_data] Skipping invalid lesion for patient "
+                        f"{patient_id}, scan {scan_date}: {exc}"
+                    )
 
-                if not scan_date:
-                    continue
+            if not lesions:
+                continue
 
-                # Insert scan
-                scan_cursor = conn.execute(
-                    """
-                    INSERT INTO scans (patient_fk, scan_date, accession_number, created_at)
-                    VALUES (?, ?, ?, datetime('now'))
-                    """,
-                    (patient_fk, scan_date, accession_number or None),
+            try:
+                save_scan(
+                    patient_fk=patient.id,
+                    scan_date=scan_date,
+                    accession_number=accession_number,
+                    lesions=lesions,
                 )
-                scan_fk = scan_cursor.lastrowid
-
-                lesions = scan_obj.get("lesions", [])
-                if not isinstance(lesions, list):
-                    continue
-
-                for lesion_obj in lesions:
-                    lesion_label = str(lesion_obj.get("lesion_label", "")).strip()
-                    notes = str(lesion_obj.get("notes", "")).strip()
-
-                    long_axis = lesion_obj.get("long", {})
-                    short_axis = lesion_obj.get("short", {})
-
-                    try:
-                        long_x1 = float(long_axis.get("x1", 0))
-                        long_y1 = float(long_axis.get("y1", 0))
-                        long_z1 = float(long_axis.get("z1", 0))
-                        long_x2 = float(long_axis.get("x2", 0))
-                        long_y2 = float(long_axis.get("y2", 0))
-                        long_z2 = float(long_axis.get("z2", 0))
-
-                        short_x1 = float(short_axis.get("x1", 0))
-                        short_y1 = float(short_axis.get("y1", 0))
-                        short_z1 = float(short_axis.get("z1", 0))
-                        short_x2 = float(short_axis.get("x2", 0))
-                        short_y2 = float(short_axis.get("y2", 0))
-                        short_z2 = float(short_axis.get("z2", 0))
-                    except (TypeError, ValueError):
-                        continue
-
-                    long_diameter = euclidean_distance_3d(
-                        long_x1, long_y1, long_z1,
-                        long_x2, long_y2, long_z2,
-                    )
-
-                    short_diameter = euclidean_distance_3d(
-                        short_x1, short_y1, short_z1,
-                        short_x2, short_y2, short_z2,
-                    )
-
-                    conn.execute(
-                        """
-                        INSERT INTO lesions (
-                            scan_fk,
-                            lesion_label,
-
-                            long_x1, long_y1, long_z1,
-                            long_x2, long_y2, long_z2,
-
-                            short_x1, short_y1, short_z1,
-                            short_x2, short_y2, short_z2,
-
-                            long_diameter,
-                            short_diameter,
-                            notes
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """,
-                        (
-                            scan_fk,
-                            lesion_label,
-
-                            long_x1,
-                            long_y1,
-                            long_z1,
-                            long_x2,
-                            long_y2,
-                            long_z2,
-
-                            short_x1,
-                            short_y1,
-                            short_z1,
-                            short_x2,
-                            short_y2,
-                            short_z2,
-
-                            long_diameter,
-                            short_diameter,
-                            notes,
-                        ),
-                    )
-
-        conn.commit()
-
-    print("Demo data seeded successfully.")
+            except Exception as exc:
+                print(
+                    f"[seed_data] Failed to save scan for patient "
+                    f"{patient_id}, scan {scan_date}: {exc}"
+                )

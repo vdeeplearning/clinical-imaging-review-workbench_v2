@@ -1,62 +1,73 @@
 from __future__ import annotations
 
 import sqlite3
+import sys
 from pathlib import Path
 
 
 DB_FILENAME = "clinical_imaging_review.db"
 
 
-def get_db_path() -> Path:
+def get_base_path() -> Path:
     """
-    Return the path to the SQLite database file in the project root.
+    Return the correct writable base path for both:
+    - normal source execution -> project root
+    - PyInstaller bundled execution -> folder containing the .exe
     """
-    return Path(__file__).resolve().parent.parent / DB_FILENAME
+    if getattr(sys, "frozen", False):
+        # Running as a bundled executable
+        return Path(sys.executable).resolve().parent
+
+    # Running from source: app/database.py -> app -> project root
+    return Path(__file__).resolve().parent.parent
+
+
+def get_database_path() -> Path:
+    return get_base_path() / DB_FILENAME
 
 
 def get_connection() -> sqlite3.Connection:
-    """
-    Create and return a SQLite connection with row access by column name.
-    """
-    conn = sqlite3.connect(get_db_path())
+    db_path = get_database_path()
+
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
+
+    # Enable foreign key support (important for correctness, even if
+    # current delete logic is explicit/manual).
     conn.execute("PRAGMA foreign_keys = ON;")
+
     return conn
 
 
 def initialize_database() -> None:
-    """
-    Create database tables if they do not already exist.
-    """
     with get_connection() as conn:
-        cursor = conn.cursor()
+        cur = conn.cursor()
 
-        cursor.execute(
+        cur.execute(
             """
             CREATE TABLE IF NOT EXISTS patients (
-                id INTEGER PRIMARY KEY,
-                patient_id TEXT UNIQUE NOT NULL
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                patient_id TEXT NOT NULL UNIQUE
             )
             """
         )
 
-        cursor.execute(
+        cur.execute(
             """
             CREATE TABLE IF NOT EXISTS scans (
-                id INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 patient_fk INTEGER NOT NULL,
                 scan_date TEXT NOT NULL,
                 accession_number TEXT,
-                created_at TEXT NOT NULL,
-                FOREIGN KEY (patient_fk) REFERENCES patients(id) ON DELETE CASCADE
+                FOREIGN KEY (patient_fk) REFERENCES patients(id)
             )
             """
         )
 
-        cursor.execute(
+        cur.execute(
             """
             CREATE TABLE IF NOT EXISTS lesions (
-                id INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 scan_fk INTEGER NOT NULL,
                 lesion_label TEXT NOT NULL,
 
@@ -79,7 +90,7 @@ def initialize_database() -> None:
 
                 notes TEXT,
 
-                FOREIGN KEY (scan_fk) REFERENCES scans(id) ON DELETE CASCADE
+                FOREIGN KEY (scan_fk) REFERENCES scans(id)
             )
             """
         )
