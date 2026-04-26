@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Optional
 
 from PySide6.QtCore import Qt, QDate
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QDateEdit,
+    QFileDialog,
     QFormLayout,
     QFrame,
     QHBoxLayout,
@@ -14,16 +16,17 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QPushButton,
-    QScrollArea,
     QSplitter,
     QStackedWidget,
     QTableWidget,
     QTableWidgetItem,
+    QTextEdit,
     QVBoxLayout,
     QWidget,
 )
 
-from app.models import Lesion, Patient
+from app.database import get_base_path
+from app.models import Patient
 from app.services import (
     delete_patient,
     delete_scan,
@@ -34,9 +37,8 @@ from app.services import (
     get_scan_history_for_patient,
     save_scan,
 )
-from app.ui.lesion_form import LesionFormWidget
+from app.ui.image_viewer import ImageViewerWidget
 from app.ui.scan_detail import ScanDetailWidget
-from app.utils import duplicate_labels, endpoints_are_identical, short_greater_than_long
 
 
 class MainWindow(QMainWindow):
@@ -47,11 +49,72 @@ class MainWindow(QMainWindow):
         self.resize(1700, 950)
 
         self.current_patient: Optional[Patient] = None
-        self.lesion_widgets: list[LesionFormWidget] = []
+        self.project_root = get_base_path()
 
         self._apply_app_style()
         self._build_ui()
         self._refresh_patient_table()
+
+    def _show_warning(self, title: str, message: str) -> None:
+        body = (
+            message.strip()
+            or (
+                "The requested action could not be completed. "
+                "Please check the current selection and try again."
+            )
+        )
+
+        dialog = QMessageBox(self)
+        dialog.setIcon(QMessageBox.Icon.Warning)
+        dialog.setWindowTitle(title or "Warning")
+        dialog.setText(body)
+        dialog.setStyleSheet(self._message_box_style())
+        dialog.setStandardButtons(QMessageBox.StandardButton.Ok)
+        dialog.exec()
+
+    def _show_info(self, title: str, message: str) -> None:
+        dialog = QMessageBox(self)
+        dialog.setIcon(QMessageBox.Icon.Information)
+        dialog.setWindowTitle(title)
+        dialog.setText(message)
+        dialog.setStyleSheet(self._message_box_style())
+        dialog.setStandardButtons(QMessageBox.StandardButton.Ok)
+        dialog.exec()
+
+    def _confirm(self, title: str, message: str) -> bool:
+        dialog = QMessageBox(self)
+        dialog.setIcon(QMessageBox.Icon.Question)
+        dialog.setWindowTitle(title)
+        dialog.setText(message)
+        dialog.setStyleSheet(self._message_box_style())
+        dialog.setStandardButtons(
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        dialog.setDefaultButton(QMessageBox.StandardButton.No)
+        return dialog.exec() == QMessageBox.StandardButton.Yes
+
+    def _message_box_style(self) -> str:
+        return """
+            QMessageBox {
+                background-color: #1f2430;
+            }
+            QMessageBox QLabel {
+                color: #e8ecf1;
+                font-size: 13px;
+            }
+            QMessageBox QPushButton {
+                background-color: #2f6fed;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 12px;
+                color: white;
+                font-weight: bold;
+                min-width: 80px;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #3a7bff;
+            }
+        """
 
     def _apply_app_style(self) -> None:
         self.setStyleSheet(
@@ -121,6 +184,12 @@ class MainWindow(QMainWindow):
                 background-color: #5b6270;
                 color: #c7ccd4;
             }
+            QMessageBox {
+                background-color: #1f2430;
+            }
+            QMessageBox QLabel {
+                color: #e8ecf1;
+            }
             """
         )
 
@@ -157,7 +226,7 @@ class MainWindow(QMainWindow):
 
         layout.addLayout(form_layout)
 
-        self.load_patient_button = QPushButton("Load Patient")
+        self.load_patient_button = QPushButton("Load New or Existing Patient by Patient ID")
         self.load_patient_button.clicked.connect(self._load_patient)
         layout.addWidget(self.load_patient_button)
 
@@ -211,7 +280,7 @@ class MainWindow(QMainWindow):
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(4)
         self.history_table.setHorizontalHeaderLabels(
-            ["Scan Date", "Accession #", "Lesions", "Total Burden (mm)"]
+            ["Scan Date", "Accession #", "Box", "Notes"]
         )
         self.history_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.history_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
@@ -233,6 +302,11 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(panel)
         layout.setSpacing(12)
 
+        workspace_splitter = QSplitter(Qt.Orientation.Horizontal)
+
+        self.current_image_path = "sample_data/dummy_scan.png"
+        self.image_viewer = ImageViewerWidget()
+        self.image_viewer.load_image(self.current_image_path)
         self.workspace_stack = QStackedWidget()
 
         self.new_scan_widget = self._build_new_scan_widget()
@@ -241,7 +315,11 @@ class MainWindow(QMainWindow):
         self.workspace_stack.addWidget(self.new_scan_widget)
         self.workspace_stack.addWidget(self.scan_detail_widget)
 
-        layout.addWidget(self.workspace_stack)
+        workspace_splitter.addWidget(self.image_viewer)
+        workspace_splitter.addWidget(self.workspace_stack)
+        workspace_splitter.setSizes([560, 380])
+
+        layout.addWidget(workspace_splitter)
 
         return panel
 
@@ -250,7 +328,7 @@ class MainWindow(QMainWindow):
         main_layout = QVBoxLayout(container)
         main_layout.setSpacing(12)
 
-        header = QLabel("New Scan Entry")
+        header = QLabel("New Single-Lesion Scan")
         header.setObjectName("sectionHeader")
         main_layout.addWidget(header)
 
@@ -269,16 +347,16 @@ class MainWindow(QMainWindow):
         self.accession_input.setPlaceholderText("Optional accession / study ID")
         form_layout.addRow("Accession #:", self.accession_input)
 
+        self.selected_image_label = QLabel("No image selected")
+        self.selected_image_label.setWordWrap(True)
+        form_layout.addRow("Image:", self.selected_image_label)
+
         main_layout.addLayout(form_layout)
 
         button_row = QHBoxLayout()
-        self.add_lesion_button = QPushButton("Add Lesion")
-        self.add_lesion_button.clicked.connect(self._add_lesion_card)
-
         self.save_scan_button = QPushButton("Save Scan")
         self.save_scan_button.clicked.connect(self._save_scan)
 
-        button_row.addWidget(self.add_lesion_button)
         button_row.addWidget(self.save_scan_button)
         button_row.addStretch()
 
@@ -288,25 +366,15 @@ class MainWindow(QMainWindow):
         self.warning_label.setStyleSheet("color: #ffcc66; font-weight: bold;")
         main_layout.addWidget(self.warning_label)
 
-        self.new_scan_scroll = QScrollArea()
-        self.new_scan_scroll.setWidgetResizable(True)
-        self.new_scan_scroll.setStyleSheet(
-            """
-            QScrollArea {
-                border: 1px solid #3a3f4b;
-                border-radius: 6px;
-                background-color: #1b1f27;
-            }
-            """
-        )
+        notes_header = QLabel("Annotation Notes")
+        notes_header.setObjectName("subHeader")
+        main_layout.addWidget(notes_header)
 
-        self.new_scan_scroll_content = QWidget()
-        self.new_scan_scroll_layout = QVBoxLayout(self.new_scan_scroll_content)
-        self.new_scan_scroll_layout.setSpacing(12)
-        self.new_scan_scroll_layout.addStretch()
-
-        self.new_scan_scroll.setWidget(self.new_scan_scroll_content)
-        main_layout.addWidget(self.new_scan_scroll)
+        self.annotation_notes_edit = QTextEdit()
+        self.annotation_notes_edit.setPlaceholderText("Enter notes for this scan annotation...")
+        self.annotation_notes_edit.setMinimumHeight(180)
+        main_layout.addWidget(self.annotation_notes_edit)
+        main_layout.addStretch()
 
         return container
 
@@ -365,7 +433,11 @@ class MainWindow(QMainWindow):
     def _load_patient(self, from_table_selection: bool = False) -> None:
         patient_id = self.patient_id_input.text().strip()
         if not patient_id:
-            QMessageBox.warning(self, "Missing Patient ID", "Please enter a Patient ID.")
+            self._show_warning(
+                "Missing Patient ID",
+                "Enter a Patient ID before loading a patient.\n\n"
+                "You can type an existing ID or a new demo-style ID.",
+            )
             return
 
         self.current_patient = get_or_create_patient(patient_id)
@@ -383,6 +455,7 @@ class MainWindow(QMainWindow):
             self.history_table.selectRow(0)
         else:
             self.scan_detail_widget.clear()
+            self.image_viewer.set_annotation_rect(None)
             self.workspace_stack.setCurrentWidget(self.scan_detail_widget)
 
     def _refresh_history_table(self) -> None:
@@ -399,13 +472,13 @@ class MainWindow(QMainWindow):
             date_item.setData(Qt.ItemDataRole.UserRole, scan.id)
 
             accession_item = QTableWidgetItem(scan.accession_number or "—")
-            lesion_count_item = QTableWidgetItem(str(scan.lesion_count))
-            total_burden_item = QTableWidgetItem(f"{scan.total_burden:.2f}")
+            box_item = QTableWidgetItem("Yes" if scan.annotation_present else "No")
+            notes_item = QTableWidgetItem("Yes" if scan.notes_present else "No")
 
             self.history_table.setItem(row_index, 0, date_item)
             self.history_table.setItem(row_index, 1, accession_item)
-            self.history_table.setItem(row_index, 2, lesion_count_item)
-            self.history_table.setItem(row_index, 3, total_burden_item)
+            self.history_table.setItem(row_index, 2, box_item)
+            self.history_table.setItem(row_index, 3, notes_item)
 
         self.history_table.resizeColumnsToContents()
 
@@ -422,15 +495,31 @@ class MainWindow(QMainWindow):
 
         scan_detail = get_scan_detail(scan_id)
         if scan_detail is None:
-            QMessageBox.warning(self, "Error", "Unable to load scan details.")
+            self._show_warning(
+                "Unable to Load Scan",
+                "The selected scan could not be found in the local database.\n\n"
+                "Refresh the patient or select another scan.",
+            )
             return
 
         self.scan_detail_widget.load_scan(scan_detail)
+        self.current_image_path = scan_detail.image_path or "sample_data/dummy_scan.png"
+        self.image_viewer.load_image(self.current_image_path)
+        self.image_viewer.set_annotation_rect(
+            self._get_scan_box(scan_detail)
+        )
         self.workspace_stack.setCurrentWidget(self.scan_detail_widget)
 
     def _start_new_scan(self) -> None:
         if self.current_patient is None:
-            QMessageBox.warning(self, "No Patient", "Please load a patient first.")
+            self._show_warning(
+                "No Patient Loaded",
+                "Load or select a patient before starting a new scan.",
+            )
+            return
+
+        selected_image_path = self._prompt_for_scan_image()
+        if selected_image_path is None:
             return
 
         self.history_table.clearSelection()
@@ -438,38 +527,99 @@ class MainWindow(QMainWindow):
         self.scan_date_edit.setDate(QDate.currentDate())
         self.accession_input.clear()
         self.warning_label.clear()
-        self._clear_lesion_cards()
-        self._add_lesion_card()
+        self.annotation_notes_edit.clear()
+        self.current_image_path = selected_image_path
+        self.image_viewer.load_image(self.current_image_path)
+        self.selected_image_label.setText(self.current_image_path)
+        self.image_viewer.set_annotation_rect(None)
         self.workspace_stack.setCurrentWidget(self.new_scan_widget)
 
-    def _add_lesion_card(self) -> None:
-        lesion_widget = LesionFormWidget(
-            lesion_number=len(self.lesion_widgets) + 1,
-            read_only=False,
-            on_remove=self._remove_lesion_card,
-        )
-        self.lesion_widgets.append(lesion_widget)
-        self.new_scan_scroll_layout.insertWidget(
-            self.new_scan_scroll_layout.count() - 1,
-            lesion_widget,
-        )
+    def _prompt_for_scan_image(self) -> Optional[str]:
+        initial_dir = self.project_root / "sample_data" / "unannotated"
+        if not initial_dir.exists():
+            initial_dir = self.project_root / "sample_data"
 
-    def _remove_lesion_card(self, widget: LesionFormWidget) -> None:
-        if widget in self.lesion_widgets:
-            self.lesion_widgets.remove(widget)
-            self.new_scan_scroll_layout.removeWidget(widget)
-            widget.deleteLater()
-            self._renumber_lesion_cards()
+        dialog = QFileDialog(self, "Choose Image for New Scan", str(initial_dir))
+        dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
+        dialog.setNameFilter("Image Files (*.png *.jpg *.jpeg)")
+        dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
+        dialog.setStyleSheet(self._file_dialog_style())
 
-    def _renumber_lesion_cards(self) -> None:
-        for index, lesion_widget in enumerate(self.lesion_widgets, start=1):
-            lesion_widget.renumber(index)
+        if dialog.exec() != QFileDialog.DialogCode.Accepted:
+            return None
 
-    def _clear_lesion_cards(self) -> None:
-        for widget in self.lesion_widgets:
-            self.new_scan_scroll_layout.removeWidget(widget)
-            widget.deleteLater()
-        self.lesion_widgets.clear()
+        selected_files = dialog.selectedFiles()
+        if not selected_files:
+            return None
+
+        image_path = selected_files[0]
+        portable_path = self._to_project_relative_path(image_path)
+        if not self.image_viewer.load_image(portable_path):
+            self._show_warning(
+                "Unable to Load Image",
+                "The selected image could not be opened.\n\n"
+                "Choose a local PNG or JPG image.",
+            )
+            return None
+
+        return portable_path
+
+    def _to_project_relative_path(self, image_path: str) -> str:
+        path = Path(image_path)
+        try:
+            return path.resolve().relative_to(self.project_root).as_posix()
+        except ValueError:
+            return image_path
+
+    def _file_dialog_style(self) -> str:
+        return """
+            QFileDialog {
+                background-color: #1f2430;
+                color: #e8ecf1;
+            }
+            QFileDialog QWidget {
+                background-color: #1f2430;
+                color: #e8ecf1;
+            }
+            QFileDialog QLabel {
+                color: #e8ecf1;
+            }
+            QFileDialog QLineEdit,
+            QFileDialog QComboBox,
+            QFileDialog QListView,
+            QFileDialog QTreeView {
+                background-color: #232833;
+                color: #e8ecf1;
+                border: 1px solid #3a3f4b;
+                border-radius: 4px;
+                padding: 4px;
+                selection-background-color: #2f6fed;
+                selection-color: #ffffff;
+            }
+            QFileDialog QHeaderView::section {
+                background-color: #2a3140;
+                color: #e8ecf1;
+                border: 1px solid #3a3f4b;
+                padding: 4px;
+            }
+            QFileDialog QPushButton {
+                background-color: #2f6fed;
+                border: none;
+                border-radius: 6px;
+                padding: 7px 12px;
+                color: white;
+                font-weight: bold;
+                min-width: 72px;
+            }
+            QFileDialog QPushButton:hover {
+                background-color: #3a7bff;
+            }
+            QFileDialog QComboBox QAbstractItemView {
+                background-color: #232833;
+                color: #e8ecf1;
+                selection-background-color: #2f6fed;
+            }
+        """
 
     def _clear_current_patient_context(self) -> None:
         self.current_patient = None
@@ -483,46 +633,26 @@ class MainWindow(QMainWindow):
         self.warning_label.clear()
         self.accession_input.clear()
         self.new_scan_patient_label.setText("—")
-        self._clear_lesion_cards()
+        self.selected_image_label.setText("No image selected")
+        self.annotation_notes_edit.clear()
 
         self.scan_detail_widget.clear()
+        self.image_viewer.set_annotation_rect(None)
         self.workspace_stack.setCurrentWidget(self.scan_detail_widget)
 
     def _validate_before_save(self) -> tuple[bool, str, str]:
         if self.current_patient is None:
             return False, "No patient loaded.", ""
 
-        if not self.lesion_widgets:
-            return False, "At least one lesion is required.", ""
+        if self.image_viewer.get_annotation_rect() is None:
+            return (
+                False,
+                "Draw a box on the image before saving the scan.\n\n"
+                "Click and drag over the image viewer to create the annotation box.",
+                "",
+            )
 
-        lesions = [widget.to_lesion() for widget in self.lesion_widgets]
-
-        for index, lesion in enumerate(lesions, start=1):
-            if not lesion.lesion_label.strip():
-                return False, f"Lesion {index}: lesion label is required.", ""
-
-            if endpoints_are_identical(
-                lesion.long_x1, lesion.long_y1, lesion.long_z1,
-                lesion.long_x2, lesion.long_y2, lesion.long_z2,
-            ):
-                return False, f"Lesion {index}: long-axis endpoints cannot be identical.", ""
-
-            if endpoints_are_identical(
-                lesion.short_x1, lesion.short_y1, lesion.short_z1,
-                lesion.short_x2, lesion.short_y2, lesion.short_z2,
-            ):
-                return False, f"Lesion {index}: short-axis endpoints cannot be identical.", ""
-
-        warning_messages: list[str] = []
-
-        duplicates = duplicate_labels([lesion.lesion_label for lesion in lesions])
-        if duplicates:
-            warning_messages.append("Duplicate lesion labels detected.")
-
-        if any(short_greater_than_long(l.long_diameter, l.short_diameter) for l in lesions):
-            warning_messages.append("One or more lesions have short diameter > long diameter.")
-
-        return True, "", " ".join(warning_messages)
+        return True, "", ""
 
     def _select_scan_row_by_id(self, scan_id: int) -> None:
         for row in range(self.history_table.rowCount()):
@@ -564,64 +694,74 @@ class MainWindow(QMainWindow):
     def _remove_selected_patient(self) -> None:
         patient_id = self._get_selected_patient_id_from_table()
         if patient_id is None:
-            QMessageBox.warning(self, "No Patient Selected", "Please select a patient to remove.")
+            self._show_warning(
+                "No Patient Selected",
+                "Select a patient row in the Patient Directory before removing it.",
+            )
             return
 
         patient = get_patient_by_patient_id(patient_id)
         if patient is None:
-            QMessageBox.warning(self, "Delete Failed", "Selected patient no longer exists.")
+            self._show_warning(
+                "Delete Failed",
+                "The selected patient no longer exists in the database.\n\n"
+                "The patient list will be refreshed.",
+            )
             self._refresh_patient_table()
             self._clear_current_patient_context()
             return
 
-        result = QMessageBox.question(
-            self,
+        if not self._confirm(
             "Confirm Delete",
-            "Delete the selected patient and all associated scans + lesions?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
-
-        if result != QMessageBox.StandardButton.Yes:
+            "Delete the selected patient and all associated scans?",
+        ):
             return
 
         deleted = delete_patient(patient.id)
         if not deleted:
-            QMessageBox.warning(self, "Delete Failed", "Unable to delete the selected patient.")
+            self._show_warning(
+                "Delete Failed",
+                "The selected patient could not be deleted from the local database.",
+            )
             return
 
-        QMessageBox.information(self, "Deleted", "Patient removed successfully.")
+        self._show_info("Deleted", "Patient removed successfully.")
 
         self._refresh_patient_table()
         self._clear_current_patient_context()
 
     def _remove_selected_scan(self) -> None:
         if self.current_patient is None:
-            QMessageBox.warning(self, "No Patient", "Please load a patient first.")
+            self._show_warning(
+                "No Patient Loaded",
+                "Load or select a patient before removing a scan.",
+            )
             return
 
         scan_id = self._get_selected_scan_id()
         if scan_id is None:
-            QMessageBox.warning(self, "No Scan Selected", "Please select a scan to remove.")
+            self._show_warning(
+                "No Scan Selected",
+                "Select a scan row in Scan History before removing it.",
+            )
             return
 
-        result = QMessageBox.question(
-            self,
+        if not self._confirm(
             "Confirm Delete",
-            "Delete the selected scan and all associated lesions?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
-
-        if result != QMessageBox.StandardButton.Yes:
+            "Delete the selected scan?",
+        ):
             return
 
         deleted = delete_scan(scan_id)
         if not deleted:
-            QMessageBox.warning(self, "Delete Failed", "Unable to delete the selected scan.")
+            self._show_warning(
+                "Delete Failed",
+                "The selected scan could not be deleted from the local database.\n\n"
+                "It may have already been removed.",
+            )
             return
 
-        QMessageBox.information(self, "Deleted", "Scan removed successfully.")
+        self._show_info("Deleted", "Scan removed successfully.")
 
         self._refresh_patient_table()
         self._refresh_history_table()
@@ -630,20 +770,27 @@ class MainWindow(QMainWindow):
             self.history_table.selectRow(0)
         else:
             self.scan_detail_widget.clear()
+            self.image_viewer.set_annotation_rect(None)
             self.workspace_stack.setCurrentWidget(self.scan_detail_widget)
 
     def _save_scan(self) -> None:
         is_valid, error_message, warning_message = self._validate_before_save()
 
         if not is_valid:
-            QMessageBox.warning(self, "Validation Error", error_message)
+            self._show_warning(
+                "Cannot Save Scan",
+                error_message,
+            )
             return
 
         if self.current_patient is None:
-            QMessageBox.warning(self, "No Patient", "Please load a patient first.")
+            self._show_warning(
+                "No Patient Loaded",
+                "Load or select a patient before saving a scan.",
+            )
             return
 
-        lesions: list[Lesion] = [widget.to_lesion() for widget in self.lesion_widgets]
+        annotation_notes = self.annotation_notes_edit.toPlainText().strip()
         scan_date = self.scan_date_edit.date().toString("yyyy-MM-dd")
         accession_number = self.accession_input.text().strip()
 
@@ -651,17 +798,34 @@ class MainWindow(QMainWindow):
             patient_fk=self.current_patient.id,
             scan_date=scan_date,
             accession_number=accession_number,
-            lesions=lesions,
+            lesions=[],
+            annotation_box=self.image_viewer.get_annotation_rect(),
+            notes=annotation_notes,
+            image_path=self.current_image_path,
         )
 
         self.warning_label.setText(warning_message)
-        QMessageBox.information(self, "Saved", "Scan saved successfully.")
+        self._show_info("Saved", "Scan saved successfully.")
 
         self._refresh_patient_table()
         self._refresh_history_table()
-        self._clear_lesion_cards()
         self._select_scan_row_by_id(new_scan_id)
 
+    def _get_scan_box(
+        self,
+        scan_detail,
+    ) -> Optional[tuple[float, float, float, float]]:
+        values = (
+            scan_detail.box_x,
+            scan_detail.box_y,
+            scan_detail.box_w,
+            scan_detail.box_h,
+        )
+
+        if any(value is None for value in values):
+            return None
+
+        return tuple(float(value) for value in values)
+
     def closeEvent(self, event) -> None:
-        self._clear_lesion_cards()
         super().closeEvent(event)

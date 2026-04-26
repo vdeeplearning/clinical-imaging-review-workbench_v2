@@ -1,288 +1,750 @@
 {
-  "patients": [
-    {
-      "patient_id": "PT-001",
-      "scans": [
-        {
-          "scan_date": "2025-01-10",
-          "accession_number": "ACC-1001",
-          "lesions": [
-            {
-              "lesion_label": "Target 1",
-              "long": { "x1": 0, "y1": 0, "z1": 0, "x2": 12, "y2": 0, "z2": 0 },
-              "short": { "x1": 0, "y1": 0, "z1": 0, "x2": 6, "y2": 0, "z2": 0 },
-              "notes": "Baseline target lesion"
-            }
-          ]
-        },
-        {
-          "scan_date": "2025-03-15",
-          "accession_number": "ACC-1002",
-          "lesions": [
-            {
-              "lesion_label": "Target 1",
-              "long": { "x1": 0, "y1": 0, "z1": 0, "x2": 15, "y2": 0, "z2": 0 },
-              "short": { "x1": 0, "y1": 0, "z1": 0, "x2": 7, "y2": 0, "z2": 0 },
-              "notes": "Interval increase in size"
-            },
-            {
-              "lesion_label": "Node A",
-              "long": { "x1": 5, "y1": 5, "z1": 0, "x2": 11, "y2": 5, "z2": 0 },
-              "short": { "x1": 6, "y1": 5, "z1": 0, "x2": 9, "y2": 5, "z2": 0 },
-              "notes": "New nodal lesion"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-002",
-      "scans": [
-        {
-          "scan_date": "2025-02-20",
-          "accession_number": "ACC-2001",
-          "lesions": [
-            {
-              "lesion_label": "Target 1",
-              "long": { "x1": 1, "y1": 1, "z1": 0, "x2": 9, "y2": 1, "z2": 0 },
-              "short": { "x1": 2, "y1": 1, "z1": 0, "x2": 6, "y2": 1, "z2": 0 },
-              "notes": "Stable lesion"
-            },
-            {
-              "lesion_label": "Liver Focus",
-              "long": { "x1": 3, "y1": 4, "z1": 0, "x2": 10, "y2": 4, "z2": 0 },
-              "short": { "x1": 4, "y1": 4, "z1": 0, "x2": 7, "y2": 4, "z2": 0 },
-              "notes": "Indeterminate hepatic lesion"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-003",
-      "scans": [
-        {
-          "scan_date": "2025-01-05",
-          "accession_number": "ACC-3001",
-          "lesions": [
-            {
-              "lesion_label": "Target 1",
-              "long": { "x1": 0, "y1": 2, "z1": 0, "x2": 8, "y2": 2, "z2": 0 },
-              "short": { "x1": 1, "y1": 2, "z1": 0, "x2": 4, "y2": 2, "z2": 0 },
-              "notes": "Small target lesion"
-            }
-          ]
-        },
-        {
-          "scan_date": "2025-04-12",
-          "accession_number": "ACC-3002",
-          "lesions": [
-            {
-              "lesion_label": "Target 1",
-              "long": { "x1": 0, "y1": 2, "z1": 0, "x2": 7, "y2": 2, "z2": 0 },
-              "short": { "x1": 1, "y1": 2, "z1": 0, "x2": 3, "y2": 2, "z2": 0 },
-              "notes": "Mild interval decrease"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-004",
-      "scans": [
-        {
-          "scan_date": "2025-02-01",
-          "accession_number": "ACC-4001",
-          "lesions": [
-            {
-              "lesion_label": "Lung Nodule 1",
-              "long": { "x1": 2, "y1": 2, "z1": 0, "x2": 13, "y2": 2, "z2": 0 },
-              "short": { "x1": 4, "y1": 2, "z1": 0, "x2": 9, "y2": 2, "z2": 0 },
-              "notes": "Spiculated right upper lobe nodule"
-            },
-            {
-              "lesion_label": "Lung Nodule 2",
-              "long": { "x1": 1, "y1": 6, "z1": 0, "x2": 7, "y2": 6, "z2": 0 },
-              "short": { "x1": 2, "y1": 6, "z1": 0, "x2": 5, "y2": 6, "z2": 0 },
-              "notes": "Smaller satellite nodule"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-005",
-      "scans": [
-        {
-          "scan_date": "2025-01-18",
-          "accession_number": "ACC-5001",
-          "lesions": [
-            {
-              "lesion_label": "Adrenal Mass",
-              "long": { "x1": 3, "y1": 3, "z1": 0, "x2": 18, "y2": 3, "z2": 0 },
-              "short": { "x1": 6, "y1": 3, "z1": 0, "x2": 12, "y2": 3, "z2": 0 },
-              "notes": "Left adrenal lesion"
-            }
-          ]
-        },
-        {
-          "scan_date": "2025-05-02",
-          "accession_number": "ACC-5002",
-          "lesions": [
-            {
-              "lesion_label": "Adrenal Mass",
-              "long": { "x1": 3, "y1": 3, "z1": 0, "x2": 14, "y2": 3, "z2": 0 },
-              "short": { "x1": 5, "y1": 3, "z1": 0, "x2": 10, "y2": 3, "z2": 0 },
-              "notes": "Partial treatment response"
-            },
-            {
-              "lesion_label": "Retroperitoneal Node",
-              "long": { "x1": 7, "y1": 7, "z1": 0, "x2": 13, "y2": 7, "z2": 0 },
-              "short": { "x1": 8, "y1": 7, "z1": 0, "x2": 11, "y2": 7, "z2": 0 },
-              "notes": "Persistent nodal disease"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-006",
-      "scans": [
-        {
-          "scan_date": "2025-03-03",
-          "accession_number": "ACC-6001",
-          "lesions": [
-            {
-              "lesion_label": "Pelvic Node",
-              "long": { "x1": 2, "y1": 8, "z1": 0, "x2": 10, "y2": 8, "z2": 0 },
-              "short": { "x1": 4, "y1": 8, "z1": 0, "x2": 7, "y2": 8, "z2": 0 },
-              "notes": "Borderline enlarged pelvic node"
-            },
-            {
-              "lesion_label": "Inguinal Node",
-              "long": { "x1": 11, "y1": 8, "z1": 0, "x2": 17, "y2": 8, "z2": 0 },
-              "short": { "x1": 12, "y1": 8, "z1": 0, "x2": 15, "y2": 8, "z2": 0 },
-              "notes": "Mildly enlarged inguinal node"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-007",
-      "scans": [
-        {
-          "scan_date": "2025-02-11",
-          "accession_number": "ACC-7001",
-          "lesions": [
-            {
-              "lesion_label": "Liver Lesion A",
-              "long": { "x1": 5, "y1": 1, "z1": 0, "x2": 17, "y2": 1, "z2": 0 },
-              "short": { "x1": 7, "y1": 1, "z1": 0, "x2": 12, "y2": 1, "z2": 0 },
-              "notes": "Segment VIII lesion"
-            },
-            {
-              "lesion_label": "Liver Lesion B",
-              "long": { "x1": 6, "y1": 4, "z1": 0, "x2": 14, "y2": 4, "z2": 0 },
-              "short": { "x1": 8, "y1": 4, "z1": 0, "x2": 11, "y2": 4, "z2": 0 },
-              "notes": "Smaller segment VI lesion"
-            }
-          ]
-        },
-        {
-          "scan_date": "2025-06-01",
-          "accession_number": "ACC-7002",
-          "lesions": [
-            {
-              "lesion_label": "Liver Lesion A",
-              "long": { "x1": 5, "y1": 1, "z1": 0, "x2": 20, "y2": 1, "z2": 0 },
-              "short": { "x1": 7, "y1": 1, "z1": 0, "x2": 14, "y2": 1, "z2": 0 },
-              "notes": "Interval progression"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-008",
-      "scans": [
-        {
-          "scan_date": "2025-01-22",
-          "accession_number": "ACC-8001",
-          "lesions": [
-            {
-              "lesion_label": "Pancreatic Tail Mass",
-              "long": { "x1": 2, "y1": 9, "z1": 0, "x2": 19, "y2": 9, "z2": 0 },
-              "short": { "x1": 6, "y1": 9, "z1": 0, "x2": 13, "y2": 9, "z2": 0 },
-              "notes": "Primary pancreatic lesion"
-            },
-            {
-              "lesion_label": "Peripancreatic Node",
-              "long": { "x1": 10, "y1": 3, "z1": 0, "x2": 16, "y2": 3, "z2": 0 },
-              "short": { "x1": 11, "y1": 3, "z1": 0, "x2": 14, "y2": 3, "z2": 0 },
-              "notes": "Adjacent nodal metastasis"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-009",
-      "scans": [
-        {
-          "scan_date": "2025-04-08",
-          "accession_number": "ACC-9001",
-          "lesions": [
-            {
-              "lesion_label": "Bone Lesion L3",
-              "long": { "x1": 1, "y1": 10, "z1": 0, "x2": 9, "y2": 10, "z2": 0 },
-              "short": { "x1": 3, "y1": 10, "z1": 0, "x2": 6, "y2": 10, "z2": 0 },
-              "notes": "Lytic lesion at L3"
-            },
-            {
-              "lesion_label": "Bone Lesion Ilium",
-              "long": { "x1": 12, "y1": 10, "z1": 0, "x2": 20, "y2": 10, "z2": 0 },
-              "short": { "x1": 14, "y1": 10, "z1": 0, "x2": 17, "y2": 10, "z2": 0 },
-              "notes": "Right iliac osseous lesion"
-            },
-            {
-              "lesion_label": "Sacral Lesion",
-              "long": { "x1": 21, "y1": 10, "z1": 0, "x2": 28, "y2": 10, "z2": 0 },
-              "short": { "x1": 23, "y1": 10, "z1": 0, "x2": 26, "y2": 10, "z2": 0 },
-              "notes": "Additional sacral osseous lesion"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "patient_id": "PT-010",
-      "scans": [
-        {
-          "scan_date": "2025-03-19",
-          "accession_number": "ACC-10001",
-          "lesions": [
-            {
-              "lesion_label": "Mediastinal Node",
-              "long": { "x1": 4, "y1": 12, "z1": 0, "x2": 13, "y2": 12, "z2": 0 },
-              "short": { "x1": 6, "y1": 12, "z1": 0, "x2": 10, "y2": 12, "z2": 0 },
-              "notes": "Pretracheal node"
-            },
-            {
-              "lesion_label": "Pleural Nodule",
-              "long": { "x1": 15, "y1": 12, "z1": 0, "x2": 21, "y2": 12, "z2": 0 },
-              "short": { "x1": 16, "y1": 12, "z1": 0, "x2": 19, "y2": 12, "z2": 0 },
-              "notes": "Small pleural-based lesion"
-            },
-            {
-              "lesion_label": "Supraclavicular Node",
-              "long": { "x1": 8, "y1": 14, "z1": 0, "x2": 14, "y2": 14, "z2": 0 },
-              "short": { "x1": 9, "y1": 14, "z1": 0, "x2": 12, "y2": 14, "z2": 0 },
-              "notes": "Enlarged left supraclavicular node"
-            }
-          ]
-        }
-      ]
-    }
-  ]
+    "patients":  [
+                     {
+                         "patient_id":  "PT-001",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-01-10",
+                                           "accession_number":  "ACC-1001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Target 1",
+                                                               "long":  {
+                                                                            "x1":  0,
+                                                                            "y1":  0,
+                                                                            "z1":  0,
+                                                                            "x2":  12,
+                                                                            "y2":  0,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  0,
+                                                                             "y1":  0,
+                                                                             "z1":  0,
+                                                                             "x2":  6,
+                                                                             "y2":  0,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Baseline target lesion"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_01.png",
+                                           "box":  {
+                                                       "x":  342,
+                                                       "y":  450,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Baseline target lesion"
+                                       },
+                                       {
+                                           "scan_date":  "2025-03-15",
+                                           "accession_number":  "ACC-1002",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Target 1",
+                                                               "long":  {
+                                                                            "x1":  0,
+                                                                            "y1":  0,
+                                                                            "z1":  0,
+                                                                            "x2":  15,
+                                                                            "y2":  0,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  0,
+                                                                             "y1":  0,
+                                                                             "z1":  0,
+                                                                             "x2":  7,
+                                                                             "y2":  0,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Interval increase in size"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Node A",
+                                                               "long":  {
+                                                                            "x1":  5,
+                                                                            "y1":  5,
+                                                                            "z1":  0,
+                                                                            "x2":  11,
+                                                                            "y2":  5,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  6,
+                                                                             "y1":  5,
+                                                                             "z1":  0,
+                                                                             "x2":  9,
+                                                                             "y2":  5,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "New nodal lesion"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_02.png",
+                                           "box":  {
+                                                       "x":  327,
+                                                       "y":  441,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Interval increase in size"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-002",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-02-20",
+                                           "accession_number":  "ACC-2001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Target 1",
+                                                               "long":  {
+                                                                            "x1":  1,
+                                                                            "y1":  1,
+                                                                            "z1":  0,
+                                                                            "x2":  9,
+                                                                            "y2":  1,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  2,
+                                                                             "y1":  1,
+                                                                             "z1":  0,
+                                                                             "x2":  6,
+                                                                             "y2":  1,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Stable lesion"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Liver Focus",
+                                                               "long":  {
+                                                                            "x1":  3,
+                                                                            "y1":  4,
+                                                                            "z1":  0,
+                                                                            "x2":  10,
+                                                                            "y2":  4,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  4,
+                                                                             "y1":  4,
+                                                                             "z1":  0,
+                                                                             "x2":  7,
+                                                                             "y2":  4,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Indeterminate hepatic lesion"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_03.png",
+                                           "box":  {
+                                                       "x":  935,
+                                                       "y":  433,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Stable lesion"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-003",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-01-05",
+                                           "accession_number":  "ACC-3001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Target 1",
+                                                               "long":  {
+                                                                            "x1":  0,
+                                                                            "y1":  2,
+                                                                            "z1":  0,
+                                                                            "x2":  8,
+                                                                            "y2":  2,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  1,
+                                                                             "y1":  2,
+                                                                             "z1":  0,
+                                                                             "x2":  4,
+                                                                             "y2":  2,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Small target lesion"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_04.png",
+                                           "box":  {
+                                                       "x":  902,
+                                                       "y":  453,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Small target lesion"
+                                       },
+                                       {
+                                           "scan_date":  "2025-04-12",
+                                           "accession_number":  "ACC-3002",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Target 1",
+                                                               "long":  {
+                                                                            "x1":  0,
+                                                                            "y1":  2,
+                                                                            "z1":  0,
+                                                                            "x2":  7,
+                                                                            "y2":  2,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  1,
+                                                                             "y1":  2,
+                                                                             "z1":  0,
+                                                                             "x2":  3,
+                                                                             "y2":  2,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Mild interval decrease"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_05.png",
+                                           "box":  {
+                                                       "x":  330,
+                                                       "y":  445,
+                                                       "w":  93,
+                                                       "h":  93
+                                                   },
+                                           "notes":  "Mild interval decrease"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-004",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-02-01",
+                                           "accession_number":  "ACC-4001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Lung Nodule 1",
+                                                               "long":  {
+                                                                            "x1":  2,
+                                                                            "y1":  2,
+                                                                            "z1":  0,
+                                                                            "x2":  13,
+                                                                            "y2":  2,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  4,
+                                                                             "y1":  2,
+                                                                             "z1":  0,
+                                                                             "x2":  9,
+                                                                             "y2":  2,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Spiculated right upper lobe nodule"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Lung Nodule 2",
+                                                               "long":  {
+                                                                            "x1":  1,
+                                                                            "y1":  6,
+                                                                            "z1":  0,
+                                                                            "x2":  7,
+                                                                            "y2":  6,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  2,
+                                                                             "y1":  6,
+                                                                             "z1":  0,
+                                                                             "x2":  5,
+                                                                             "y2":  6,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Smaller satellite nodule"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_06.png",
+                                           "box":  {
+                                                       "x":  924,
+                                                       "y":  436,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Spiculated right upper lobe nodule"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-005",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-01-18",
+                                           "accession_number":  "ACC-5001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Adrenal Mass",
+                                                               "long":  {
+                                                                            "x1":  3,
+                                                                            "y1":  3,
+                                                                            "z1":  0,
+                                                                            "x2":  18,
+                                                                            "y2":  3,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  6,
+                                                                             "y1":  3,
+                                                                             "z1":  0,
+                                                                             "x2":  12,
+                                                                             "y2":  3,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Left adrenal lesion"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_07.png",
+                                           "box":  {
+                                                       "x":  308,
+                                                       "y":  436,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Left adrenal lesion"
+                                       },
+                                       {
+                                           "scan_date":  "2025-05-02",
+                                           "accession_number":  "ACC-5002",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Adrenal Mass",
+                                                               "long":  {
+                                                                            "x1":  3,
+                                                                            "y1":  3,
+                                                                            "z1":  0,
+                                                                            "x2":  14,
+                                                                            "y2":  3,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  5,
+                                                                             "y1":  3,
+                                                                             "z1":  0,
+                                                                             "x2":  10,
+                                                                             "y2":  3,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Partial treatment response"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Retroperitoneal Node",
+                                                               "long":  {
+                                                                            "x1":  7,
+                                                                            "y1":  7,
+                                                                            "z1":  0,
+                                                                            "x2":  13,
+                                                                            "y2":  7,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  8,
+                                                                             "y1":  7,
+                                                                             "z1":  0,
+                                                                             "x2":  11,
+                                                                             "y2":  7,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Persistent nodal disease"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_08.png",
+                                           "box":  {
+                                                       "x":  906,
+                                                       "y":  457,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Partial treatment response"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-006",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-03-03",
+                                           "accession_number":  "ACC-6001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Pelvic Node",
+                                                               "long":  {
+                                                                            "x1":  2,
+                                                                            "y1":  8,
+                                                                            "z1":  0,
+                                                                            "x2":  10,
+                                                                            "y2":  8,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  4,
+                                                                             "y1":  8,
+                                                                             "z1":  0,
+                                                                             "x2":  7,
+                                                                             "y2":  8,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Borderline enlarged pelvic node"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Inguinal Node",
+                                                               "long":  {
+                                                                            "x1":  11,
+                                                                            "y1":  8,
+                                                                            "z1":  0,
+                                                                            "x2":  17,
+                                                                            "y2":  8,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  12,
+                                                                             "y1":  8,
+                                                                             "z1":  0,
+                                                                             "x2":  15,
+                                                                             "y2":  8,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Mildly enlarged inguinal node"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_09.png",
+                                           "box":  {
+                                                       "x":  326,
+                                                       "y":  448,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Borderline enlarged pelvic node"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-007",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-02-11",
+                                           "accession_number":  "ACC-7001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Liver Lesion A",
+                                                               "long":  {
+                                                                            "x1":  5,
+                                                                            "y1":  1,
+                                                                            "z1":  0,
+                                                                            "x2":  17,
+                                                                            "y2":  1,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  7,
+                                                                             "y1":  1,
+                                                                             "z1":  0,
+                                                                             "x2":  12,
+                                                                             "y2":  1,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Segment VIII lesion"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Liver Lesion B",
+                                                               "long":  {
+                                                                            "x1":  6,
+                                                                            "y1":  4,
+                                                                            "z1":  0,
+                                                                            "x2":  14,
+                                                                            "y2":  4,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  8,
+                                                                             "y1":  4,
+                                                                             "z1":  0,
+                                                                             "x2":  11,
+                                                                             "y2":  4,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Smaller segment VI lesion"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_10.png",
+                                           "box":  {
+                                                       "x":  936,
+                                                       "y":  440,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Segment VIII lesion"
+                                       },
+                                       {
+                                           "scan_date":  "2025-06-01",
+                                           "accession_number":  "ACC-7002",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Liver Lesion A",
+                                                               "long":  {
+                                                                            "x1":  5,
+                                                                            "y1":  1,
+                                                                            "z1":  0,
+                                                                            "x2":  20,
+                                                                            "y2":  1,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  7,
+                                                                             "y1":  1,
+                                                                             "z1":  0,
+                                                                             "x2":  14,
+                                                                             "y2":  1,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Interval progression"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_11.png",
+                                           "box":  {
+                                                       "x":  344,
+                                                       "y":  431,
+                                                       "w":  93,
+                                                       "h":  93
+                                                   },
+                                           "notes":  "Interval progression"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-008",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-01-22",
+                                           "accession_number":  "ACC-8001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Pancreatic Tail Mass",
+                                                               "long":  {
+                                                                            "x1":  2,
+                                                                            "y1":  9,
+                                                                            "z1":  0,
+                                                                            "x2":  19,
+                                                                            "y2":  9,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  6,
+                                                                             "y1":  9,
+                                                                             "z1":  0,
+                                                                             "x2":  13,
+                                                                             "y2":  9,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Primary pancreatic lesion"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Peripancreatic Node",
+                                                               "long":  {
+                                                                            "x1":  10,
+                                                                            "y1":  3,
+                                                                            "z1":  0,
+                                                                            "x2":  16,
+                                                                            "y2":  3,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  11,
+                                                                             "y1":  3,
+                                                                             "z1":  0,
+                                                                             "x2":  14,
+                                                                             "y2":  3,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Adjacent nodal metastasis"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_12.png",
+                                           "box":  {
+                                                       "x":  910,
+                                                       "y":  451,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Primary pancreatic lesion"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-009",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-04-08",
+                                           "accession_number":  "ACC-9001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Bone Lesion L3",
+                                                               "long":  {
+                                                                            "x1":  1,
+                                                                            "y1":  10,
+                                                                            "z1":  0,
+                                                                            "x2":  9,
+                                                                            "y2":  10,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  3,
+                                                                             "y1":  10,
+                                                                             "z1":  0,
+                                                                             "x2":  6,
+                                                                             "y2":  10,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Lytic lesion at L3"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Bone Lesion Ilium",
+                                                               "long":  {
+                                                                            "x1":  12,
+                                                                            "y1":  10,
+                                                                            "z1":  0,
+                                                                            "x2":  20,
+                                                                            "y2":  10,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  14,
+                                                                             "y1":  10,
+                                                                             "z1":  0,
+                                                                             "x2":  17,
+                                                                             "y2":  10,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Right iliac osseous lesion"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Sacral Lesion",
+                                                               "long":  {
+                                                                            "x1":  21,
+                                                                            "y1":  10,
+                                                                            "z1":  0,
+                                                                            "x2":  28,
+                                                                            "y2":  10,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  23,
+                                                                             "y1":  10,
+                                                                             "z1":  0,
+                                                                             "x2":  26,
+                                                                             "y2":  10,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Additional sacral osseous lesion"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_13.png",
+                                           "box":  {
+                                                       "x":  323,
+                                                       "y":  443,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Lytic lesion at L3"
+                                       }
+                                   ]
+                     },
+                     {
+                         "patient_id":  "PT-010",
+                         "scans":  [
+                                       {
+                                           "scan_date":  "2025-03-19",
+                                           "accession_number":  "ACC-10001",
+                                           "lesions":  [
+                                                           {
+                                                               "lesion_label":  "Mediastinal Node",
+                                                               "long":  {
+                                                                            "x1":  4,
+                                                                            "y1":  12,
+                                                                            "z1":  0,
+                                                                            "x2":  13,
+                                                                            "y2":  12,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  6,
+                                                                             "y1":  12,
+                                                                             "z1":  0,
+                                                                             "x2":  10,
+                                                                             "y2":  12,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Pretracheal node"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Pleural Nodule",
+                                                               "long":  {
+                                                                            "x1":  15,
+                                                                            "y1":  12,
+                                                                            "z1":  0,
+                                                                            "x2":  21,
+                                                                            "y2":  12,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  16,
+                                                                             "y1":  12,
+                                                                             "z1":  0,
+                                                                             "x2":  19,
+                                                                             "y2":  12,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Small pleural-based lesion"
+                                                           },
+                                                           {
+                                                               "lesion_label":  "Supraclavicular Node",
+                                                               "long":  {
+                                                                            "x1":  8,
+                                                                            "y1":  14,
+                                                                            "z1":  0,
+                                                                            "x2":  14,
+                                                                            "y2":  14,
+                                                                            "z2":  0
+                                                                        },
+                                                               "short":  {
+                                                                             "x1":  9,
+                                                                             "y1":  14,
+                                                                             "z1":  0,
+                                                                             "x2":  12,
+                                                                             "y2":  14,
+                                                                             "z2":  0
+                                                                         },
+                                                               "notes":  "Enlarged left supraclavicular node"
+                                                           }
+                                                       ],
+                                           "image_path":  "sample_data/demo_xray_14.png",
+                                           "box":  {
+                                                       "x":  939,
+                                                       "y":  443,
+                                                       "w":  94,
+                                                       "h":  94
+                                                   },
+                                           "notes":  "Pretracheal node"
+                                       }
+                                   ]
+                     }
+                 ]
 }

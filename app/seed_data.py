@@ -76,14 +76,43 @@ def _lesion_from_json(lesion_json: dict) -> Lesion:
     )
 
 
+def _annotation_box_from_json(scan_json: dict) -> tuple[float, float, float, float] | None:
+    box_json = scan_json.get("box")
+    if not isinstance(box_json, dict):
+        return None
+
+    try:
+        return (
+            float(box_json["x"]),
+            float(box_json["y"]),
+            float(box_json["w"]),
+            float(box_json["h"]),
+        )
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _annotation_notes_from_json(scan_json: dict) -> str:
+    notes = str(scan_json.get("notes", "")).strip()
+    if notes:
+        return notes
+
+    lesions = scan_json.get("lesions", [])
+    if isinstance(lesions, list) and lesions:
+        return str(lesions[0].get("notes", "")).strip()
+
+    return ""
+
+
+def _image_path_from_json(scan_json: dict) -> str:
+    return str(scan_json.get("image_path", "sample_data/dummy_scan.png")).strip()
+
+
 def seed_demo_data_if_needed() -> None:
     """
     Seed the database from sample_data/demo_data.json only if the DB is empty.
     Safe to call on every app startup.
     """
-    if not database_is_empty():
-        return
-
     demo_path = get_demo_data_path()
 
     if demo_path is None:
@@ -100,6 +129,10 @@ def seed_demo_data_if_needed() -> None:
     patients = payload.get("patients", [])
     if not isinstance(patients, list):
         print("[seed_data] Invalid demo data format: 'patients' must be a list.")
+        return
+
+    if not database_is_empty():
+        _update_existing_demo_annotations(patients)
         return
 
     for patient_json in patients:
@@ -144,9 +177,65 @@ def seed_demo_data_if_needed() -> None:
                     scan_date=scan_date,
                     accession_number=accession_number,
                     lesions=lesions,
+                    annotation_box=_annotation_box_from_json(scan_json),
+                    notes=_annotation_notes_from_json(scan_json),
+                    image_path=_image_path_from_json(scan_json),
                 )
             except Exception as exc:
                 print(
                     f"[seed_data] Failed to save scan for patient "
                     f"{patient_id}, scan {scan_date}: {exc}"
                 )
+
+
+def _update_existing_demo_annotations(patients: list[dict]) -> None:
+    with get_connection() as conn:
+        for patient_json in patients:
+            patient_id = str(patient_json.get("patient_id", "")).strip()
+            scans = patient_json.get("scans", [])
+            if not patient_id or not isinstance(scans, list):
+                continue
+
+            for scan_json in scans:
+                box = _annotation_box_from_json(scan_json)
+                if box is None:
+                    continue
+
+                scan_date = str(scan_json.get("scan_date", "")).strip()
+                accession_number = str(scan_json.get("accession_number", "")).strip()
+                notes = _annotation_notes_from_json(scan_json)
+                image_path = _image_path_from_json(scan_json)
+
+                conn.execute(
+                    """
+                    UPDATE scans
+                    SET
+                        box_x = ?,
+                        box_y = ?,
+                        box_w = ?,
+                        box_h = ?,
+                        notes = COALESCE(NULLIF(notes, ''), ?),
+                        image_path = ?
+                    WHERE id IN (
+                        SELECT s.id
+                        FROM scans s
+                        JOIN patients p ON p.id = s.patient_fk
+                        WHERE p.patient_id = ?
+                          AND s.scan_date = ?
+                          AND COALESCE(s.accession_number, '') = ?
+                    )
+                    """,
+                    (
+                        box[0],
+                        box[1],
+                        box[2],
+                        box[3],
+                        notes or None,
+                        image_path or None,
+                        patient_id,
+                        scan_date,
+                        accession_number,
+                    ),
+                )
+
+        conn.commit()

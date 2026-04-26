@@ -59,10 +59,22 @@ def initialize_database() -> None:
                 patient_fk INTEGER NOT NULL,
                 scan_date TEXT NOT NULL,
                 accession_number TEXT,
+                created_at TEXT,
+                demo_box_x REAL,
+                demo_box_y REAL,
+                demo_box_w REAL,
+                demo_box_h REAL,
+                box_x REAL,
+                box_y REAL,
+                box_w REAL,
+                box_h REAL,
+                notes TEXT,
+                image_path TEXT,
                 FOREIGN KEY (patient_fk) REFERENCES patients(id)
             )
             """
         )
+        _ensure_scan_columns(conn)
 
         cur.execute(
             """
@@ -95,4 +107,69 @@ def initialize_database() -> None:
             """
         )
 
+        _backfill_scan_annotations(conn)
         conn.commit()
+
+
+def _ensure_scan_columns(conn: sqlite3.Connection) -> None:
+    existing_columns = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(scans)").fetchall()
+    }
+
+    migrations = {
+        "created_at": "ALTER TABLE scans ADD COLUMN created_at TEXT",
+        "demo_box_x": "ALTER TABLE scans ADD COLUMN demo_box_x REAL",
+        "demo_box_y": "ALTER TABLE scans ADD COLUMN demo_box_y REAL",
+        "demo_box_w": "ALTER TABLE scans ADD COLUMN demo_box_w REAL",
+        "demo_box_h": "ALTER TABLE scans ADD COLUMN demo_box_h REAL",
+        "box_x": "ALTER TABLE scans ADD COLUMN box_x REAL",
+        "box_y": "ALTER TABLE scans ADD COLUMN box_y REAL",
+        "box_w": "ALTER TABLE scans ADD COLUMN box_w REAL",
+        "box_h": "ALTER TABLE scans ADD COLUMN box_h REAL",
+        "notes": "ALTER TABLE scans ADD COLUMN notes TEXT",
+        "image_path": "ALTER TABLE scans ADD COLUMN image_path TEXT",
+    }
+
+    for column_name, sql in migrations.items():
+        if column_name not in existing_columns:
+            conn.execute(sql)
+
+
+def _backfill_scan_annotations(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        UPDATE scans
+        SET
+            box_x = COALESCE(box_x, demo_box_x),
+            box_y = COALESCE(box_y, demo_box_y),
+            box_w = COALESCE(box_w, demo_box_w),
+            box_h = COALESCE(box_h, demo_box_h)
+        WHERE
+            box_x IS NULL
+            AND box_y IS NULL
+            AND box_w IS NULL
+            AND box_h IS NULL
+        """
+    )
+
+    conn.execute(
+        """
+        UPDATE scans
+        SET notes = (
+            SELECT l.notes
+            FROM lesions l
+            WHERE l.scan_fk = scans.id
+              AND COALESCE(l.notes, '') != ''
+            ORDER BY l.id ASC
+            LIMIT 1
+        )
+        WHERE COALESCE(notes, '') = ''
+          AND EXISTS (
+              SELECT 1
+              FROM lesions l
+              WHERE l.scan_fk = scans.id
+                AND COALESCE(l.notes, '') != ''
+          )
+        """
+    )

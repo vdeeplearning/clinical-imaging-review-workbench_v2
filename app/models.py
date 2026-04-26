@@ -43,8 +43,8 @@ class ScanSummary:
     scan_date: str
     accession_number: str
     created_at: str
-    lesion_count: int
-    total_burden: float
+    annotation_present: bool
+    notes_present: bool
 
 
 @dataclass
@@ -55,12 +55,24 @@ class ScanDetail:
     scan_date: str
     accession_number: str
     created_at: str
+    box_x: Optional[float] = None
+    box_y: Optional[float] = None
+    box_w: Optional[float] = None
+    box_h: Optional[float] = None
+    notes: str = ""
+    image_path: str = ""
     lesions: list[Lesion] = field(default_factory=list)
 
     @property
     def lesion_count(self) -> int:
-        return len(self.lesions)
+        return 1 if self._has_scan_box() else len(self.lesions)
 
     @property
     def total_burden(self) -> float:
         return sum(lesion.long_diameter for lesion in self.lesions)
+
+    def _has_scan_box(self) -> bool:
+        return all(
+            value is not None
+            for value in (self.box_x, self.box_y, self.box_w, self.box_h)
+        )
